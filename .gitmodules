@@ -10,3 +10,7 @@
 	path = src/roseau_msgs
 	url = git@github.com:Roboterbastler/roseau_msgs.git
 	branch = master
+[submodule "src/raspicam_node"]
+	path = src/raspicam_node
+	url = git@github.com:UbiquityRobotics/raspicam_node.git
+	branch = indigo
