@@ -6,3 +6,7 @@
 	path = src/raspi_cpu_temp
 	url = git@github.com:Roboterbastler/raspi_cpu_temp.git
 	branch = master
+[submodule "src/roseau_msgs"]
+	path = src/roseau_msgs
+	url = git@github.com:Roboterbastler/roseau_msgs.git
+	branch = master
