@@ -1,0 +1,3 @@
+<launch>
+    <node name="cpu_temp_node" pkg="raspi_cpu_temp" type="raspi_cpu_temp_node.py" />
+</launch>
