@@ -1,0 +1,16 @@
+# I2C address of the target device
+uint8 address
+
+# start position of the data to be read
+uint8 data_start
+
+# length of data in bytes to be read
+uint8 data_size
+
+---
+
+# Time stamp
+time stamp
+
+# data read from device
+uint8[] data
