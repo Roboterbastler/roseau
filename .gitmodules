@@ -1,7 +1,3 @@
-[submodule "src/roseau_lidar"]
-	path = src/roseau_lidar
-	url = git@github.com:Roboterbastler/roseau_lidar.git
-	branch = master
 [submodule "src/raspi_cpu_temp"]
 	path = src/raspi_cpu_temp
 	url = git@github.com:Roboterbastler/raspi_cpu_temp.git
