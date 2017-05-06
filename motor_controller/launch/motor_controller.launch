@@ -10,5 +10,7 @@
         <param name="windup_limit" value="10" />
         <param name="max_loop_frequency" value="100.0" />
         <param name="min_loop_frequency" value="100.0" />
+        
+        <remap from="state" to="motor_rpm" />
     </node>
 </launch>
