@@ -1,4 +1,4 @@
 [submodule "src/raspicam_node"]
-	path = src/raspicam_node
+	path = raspicam_node
 	url = git@github.com:UbiquityRobotics/raspicam_node.git
 	branch = indigo
