@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import rospy
-from roseau_backbone_bridge.srv import *
-from roseau_motor_controller.msg import WheelRpm
+from backbone_bridge.srv import *
+from motor_controller.msg import WheelRpm
 
 def backbone_write(msg):
     rospy.loginfo("Forwarding backbone write message to device: %d", msg.address)

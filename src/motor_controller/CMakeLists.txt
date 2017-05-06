@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(roseau_motor_controller)
+project(motor_controller)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -11,7 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
-  roseau_backbone_bridge
+  backbone_bridge
+  pid
 )
 
 ## System dependencies are found with CMake's conventions
