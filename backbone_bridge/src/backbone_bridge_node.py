@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import rospy
 import smbus
-from roseau_backbone_bridge.msg import BackboneWrite
-from roseau_backbone_bridge.srv import *
+from backbone_bridge.msg import BackboneWrite
+from backbone_bridge.srv import *
 
 # create and open I2C instance
 backbone_bus = smbus.SMBus(1)
