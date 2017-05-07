@@ -14,6 +14,8 @@ MotorController::MotorController(ros::NodeHandle &nh)
 void MotorController::run() {
 	// 10 Hz update rate
 	ros::Rate r(10);
+	
+	ros::service::waitForService("backbone_read");
 
 	while(ros::ok()) {
 		// publish desired motor RPM (set point)
@@ -29,7 +31,7 @@ void MotorController::run() {
 		srv.request.data_size = 4;
 
 		if(!mBackboneReadClient_.exists()) {
-			ROS_ERROR_THROTTLE(2, "Backbone read service not found: %s", mBackboneReadClient_.getService());
+			ROS_ERROR_THROTTLE(2, "Backbone read service not found: %s", mBackboneReadClient_.getService().c_str());
 		}
 
 		if(mBackboneReadClient_.call(srv)) {
