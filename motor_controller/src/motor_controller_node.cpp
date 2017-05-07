@@ -3,8 +3,8 @@
 #include <MotorController.h>
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "motor_controller");
-  ros::NodeHandle n("~");
+  ros::init(argc, argv, "motor_controller_node");
+  ros::NodeHandle n;
 
   MotorController mc(n);
 
