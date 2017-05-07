@@ -1,5 +1,5 @@
 <launch>
-    <node name="motor_controller" pkg="motor_controller" type="motor_controller_node" />
+    <node name="motor_controller" pkg="motor_controller" type="motor_controller_node" output="screen" />
     
     <node name="motor_pid_controller" pkg="pid" type="controller" >
         <param name="Kp" value="0.5" />

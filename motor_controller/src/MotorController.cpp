@@ -73,6 +73,8 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 		mCurrentMotorPower_ = 31;
 	}
 
+	ROS_INFO("Motor power: %f", mCurrentMotorPower_);
+
 	// compute PWM value from power value
 	unsigned int pwmValue = motorPowerToPwm(mCurrentMotorPower_, mCurrentDirection_);
 
