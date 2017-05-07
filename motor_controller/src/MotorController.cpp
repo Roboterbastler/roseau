@@ -29,7 +29,7 @@ void MotorController::run() {
 		srv.request.data_size = 4;
 
 		if(!mBackboneReadClient_.exists()) {
-			ROS_ERROR_THROTTLE(2, "Backbone read service not found");
+			ROS_ERROR_THROTTLE(2, "Backbone read service not found: %s", mBackboneReadClient_.getService());
 		}
 
 		if(mBackboneReadClient_.call(srv)) {
