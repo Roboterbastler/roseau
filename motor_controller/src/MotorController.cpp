@@ -28,6 +28,10 @@ void MotorController::run() {
 		srv.request.data_start = MOTOR_CONTROLLER_RPM_DATA_START;
 		srv.request.data_size = 4;
 
+		if(!mBackboneReadClient_.exists()) {
+			ROS_ERROR_THROTTLE(2, "Backbone read service not found");
+		}
+
 		if(mBackboneReadClient_.call(srv)) {
 			// get current wheel RPMs (rear wheels), stored in little-endian
 			unsigned int left_wheel_rpm = srv.response.data.at(0) | (srv.response.data.at(1) << 8);
@@ -41,7 +45,7 @@ void MotorController::run() {
 			motorRpmMsg.data = motorRpm;
 			mStatePub_.publish(motorRpmMsg);
 		} else {
-			ROS_ERROR("Reading wheel RPMs failed.");
+			ROS_ERROR_THROTTLE(2, "Reading wheel RPMs failed");
 		}
 
 		r.sleep();

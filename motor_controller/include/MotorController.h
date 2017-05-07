@@ -5,7 +5,7 @@
 #include <std_msgs/Float64.h>
 #include <backbone_bridge/BackboneRead.h>
 
-#define MOTOR_CONTROLLER_DEVICE_ADDRESS 0x10;
+#define MOTOR_CONTROLLER_DEVICE_ADDRESS 16;
 #define MOTOR_CONTROLLER_RPM_DATA_START 8
 
 class MotorController {
