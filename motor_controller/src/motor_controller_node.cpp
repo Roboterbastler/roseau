@@ -8,5 +8,5 @@ int main(int argc, char **argv) {
 
   MotorController mc(n);
 
-  mc.run();
+  ros::spin();
 }

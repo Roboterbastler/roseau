@@ -17,9 +17,8 @@ class MotorController {
 public:
   MotorController(ros::NodeHandle &nh);
 
-  void run();
-
 protected:
+  void run(const ros::WallTimerEvent& event);
   void controlEffortReceive(std_msgs::Float64 controlEffort);
   void desiredMotorRpmReceive(std_msgs::Float64 desiredRpm);
   void sendMotorPwm(unsigned int pwmValue);
@@ -29,6 +28,11 @@ protected:
    * Node handle
    */
   ros::NodeHandle &mNodeHandle_;
+
+  /**
+   * Calls the motor control loop.
+   */
+  ros::WallTimer mMotorControlLoopTimer_;
 
   /**
    * Current desired motor speed
