@@ -6,7 +6,7 @@
 MotorController::MotorController(ros::NodeHandle &nh)
   : mNodeHandle_(nh),
     mDesiredMotorRpm_(0),
-	mCurrentDirection_(Direction::HALT),
+	mCurrentDirection_(Direction::FORWARDS),
 	mCurrentMotorPower_(0) {
 
 	mSetPointPub_ = mNodeHandle_.advertise<std_msgs::Float64>("setpoint", 100);
@@ -67,7 +67,7 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 		mCurrentMotorPower_ = 31;
 	}
 
-	ROS_INFO("Motor power: %f", mCurrentMotorPower_);
+	ROS_DEBUG("Motor power: %f", mCurrentMotorPower_ * 100. / 31.);
 
 	// compute PWM value from power value
 	unsigned int pwmValue = motorPowerToPwm(mCurrentMotorPower_, mCurrentDirection_);
