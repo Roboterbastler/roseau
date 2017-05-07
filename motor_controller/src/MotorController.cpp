@@ -1,12 +1,19 @@
 #include <MotorController.h>
 
+#include <backbone_bridge/BackboneRead.h>
+#include <backbone_bridge/BackboneWrite.h>
+
 MotorController::MotorController(ros::NodeHandle &nh)
   : mNodeHandle_(nh),
-    mDesiredMotorRpm_(0) {
+    mDesiredMotorRpm_(0),
+	mCurrentDirection_(Direction::HALT),
+	mCurrentMotorPower_(0) {
 
 	mSetPointPub_ = mNodeHandle_.advertise<std_msgs::Float64>("setpoint", 100);
 	mStatePub_ = mNodeHandle_.advertise<std_msgs::Float64>("motor_rpm", 100);
+	mBackboneWritePub_ = mNodeHandle_.advertise<backbone_bridge::BackboneWrite>("backbone_write", 100);
 	mControlEffortSub_ = mNodeHandle_.subscribe("control_effort", 100, &MotorController::controlEffortReceive, this);
+	mDesiredMotorRpmSub_ = mNodeHandle_.subscribe("desired_motor_rpm", 100, &MotorController::desiredMotorRpmReceive, this);
 
 	mBackboneReadClient_ = mNodeHandle_.serviceClient<backbone_bridge::BackboneRead>("backbone_read");
 }
@@ -55,6 +62,61 @@ void MotorController::run() {
 }
 
 void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
-	// TODO
-	// send to motor
+	// apply control effort to motor PWM value
+	mCurrentMotorPower_ = mCurrentMotorPower_ + controlEffort.data;
+
+	// limit power value
+	if(mCurrentMotorPower_ < 0) {
+		mCurrentMotorPower_ = 0;
+	}
+	if(mCurrentMotorPower_ > 31) {
+		mCurrentMotorPower_ = 31;
+	}
+
+	// compute PWM value from power value
+	unsigned int pwmValue = motorPowerToPwm(mCurrentMotorPower_, mCurrentDirection_);
+
+	// send PWM value to motor
+	sendMotorPwm(pwmValue);
+}
+
+void MotorController::desiredMotorRpmReceive(std_msgs::Float64 desiredRpm) {
+	mDesiredMotorRpm_ = desiredRpm.data;
+}
+
+void MotorController::sendMotorPwm(unsigned int pwmValue) {
+	backbone_bridge::BackboneWrite bw;
+	bw.stamp = ros::Time::now();
+	bw.address = MOTOR_CONTROLLER_DEVICE_ADDRESS;
+	bw.data_index = MOTOR_CONTROLLER_ESC_PWM_DATA_START;
+
+	// little endian byte order
+	bw.data.push_back((uint8_t)(pwmValue & 0xff));
+	bw.data.push_back((uint8_t)((pwmValue >> 8) & 0xff));
+
+	mBackboneWritePub_.publish(bw);
+}
+
+unsigned int MotorController::motorPowerToPwm(double motorPower, Direction direction) {
+	ROS_ASSERT(motorPower >= 0);
+	ROS_ASSERT(motorPower <= 31);
+
+	unsigned int pwmValue;
+
+	switch(direction) {
+	case Direction::FORWARDS:
+		pwmValue = MOTOR_PWM_NEUTRAL - (unsigned int)motorPower;
+		break;
+	case Direction::BACKWARDS:
+		pwmValue = MOTOR_PWM_NEUTRAL + (unsigned int)motorPower;
+		break;
+	case Direction::HALT:
+	default:
+		pwmValue = MOTOR_PWM_NEUTRAL;
+	}
+
+	ROS_ASSERT(pwmValue >= MOTOR_PWM_MIN);
+	ROS_ASSERT(pwmValue <= MOTOR_PWM_MAX);
+
+	return pwmValue;
 }
