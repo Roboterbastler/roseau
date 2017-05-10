@@ -65,6 +65,11 @@ protected:
   ros::Publisher mStatePub_;
 
   /**
+ * Publishes the wheel RPMs.
+ */
+ros::Publisher mWheelRpmPub_;
+
+  /**
    * Publishes the motor PWM value to the backbone bus.
    */
   ros::Publisher mBackboneWritePub_;

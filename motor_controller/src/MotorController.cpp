@@ -2,6 +2,7 @@
 
 #include <backbone_bridge/BackboneRead.h>
 #include <backbone_bridge/BackboneWrite.h>
+#include <motor_controller/WheelRpm.h>
 
 MotorController::MotorController(ros::NodeHandle &nh)
   : mNodeHandle_(nh),
@@ -12,6 +13,7 @@ MotorController::MotorController(ros::NodeHandle &nh)
 	mSetPointPub_ = mNodeHandle_.advertise<std_msgs::Float64>("setpoint", 100);
 	mStatePub_ = mNodeHandle_.advertise<std_msgs::Float64>("motor_rpm", 100);
 	mBackboneWritePub_ = mNodeHandle_.advertise<backbone_bridge::BackboneWrite>("backbone_write", 100);
+	mWheelRpmPub_ = mNodeHandle_.advertise<motor_controller::WheelRpm>("wheel_rpm", 100);
 	mControlEffortSub_ = mNodeHandle_.subscribe("control_effort", 100, &MotorController::controlEffortReceive, this);
 	mDesiredMotorRpmSub_ = mNodeHandle_.subscribe("desired_motor_rpm", 100, &MotorController::desiredMotorRpmReceive, this);
 	mBackboneReadClient_ = mNodeHandle_.serviceClient<backbone_bridge::BackboneRead>("backbone_read");
@@ -42,6 +44,12 @@ void MotorController::run(const ros::WallTimerEvent& event) {
 		// get current wheel RPMs (rear wheels), stored in little-endian
 		unsigned int left_wheel_rpm = srv.response.data.at(0) | (srv.response.data.at(1) << 8);
 		unsigned int right_wheel_rpm = srv.response.data.at(2) | (srv.response.data.at(3) << 8);
+
+		// publish wheel rpms
+		motor_controller::WheelRpm wheelRpm;
+		wheelRpm.left_wheel = left_wheel_rpm;
+		wheelRpm.right_wheel = right_wheel_rpm;
+		wheelRpm.stamp = ros::Time::now();
 
 		// differential gear, thus, motor RPM is mean of wheel RPMs
 		double motorRpm = (left_wheel_rpm + right_wheel_rpm) / 2.0;
