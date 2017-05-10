@@ -72,6 +72,11 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 	// compute PWM value from power value
 	unsigned int pwmValue = motorPowerToPwm(mCurrentMotorPower_, mCurrentDirection_);
 
+	// stop immediately
+	if(mDesiredMotorRpm_ == 0) {
+		pwmValue = MOTOR_PWM_NEUTRAL;
+	}
+
 	// send PWM value to motor
 	sendMotorPwm(pwmValue);
 }
@@ -101,10 +106,10 @@ unsigned int MotorController::motorPowerToPwm(double motorPower, Direction direc
 
 	switch(direction) {
 	case Direction::FORWARDS:
-		pwmValue = MOTOR_PWM_NEUTRAL - (unsigned int)motorPower;
+		pwmValue = MOTOR_PWM_NEUTRAL + (unsigned int)motorPower;
 		break;
 	case Direction::BACKWARDS:
-		pwmValue = MOTOR_PWM_NEUTRAL + (unsigned int)motorPower;
+		pwmValue = MOTOR_PWM_NEUTRAL - (unsigned int)motorPower;
 		break;
 	case Direction::HALT:
 	default:
