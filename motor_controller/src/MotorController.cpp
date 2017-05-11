@@ -57,12 +57,7 @@ void MotorController::run(const ros::WallTimerEvent& event) {
 
 		// send state (current motor RPM) to pid
 		std_msgs::Float64 motorRpmMsg;
-		if(mCurrentDirection_ == Direction::BACKWARDS) {
-			motorRpmMsg.data = -motorRpm;
-		} else {
-			motorRpmMsg.data = motorRpm;
-		}
-
+		motorRpmMsg.data = motorRpm;
 		mStatePub_.publish(motorRpmMsg);
 	} else {
 		ROS_ERROR_THROTTLE(2, "Reading wheel RPMs failed");
