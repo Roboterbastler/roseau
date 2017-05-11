@@ -23,7 +23,6 @@ public:
 protected:
   void run(const ros::WallTimerEvent& event);
   void controlEffortReceive(std_msgs::Float64 controlEffort);
-  void desiredMotorRpmReceive(std_msgs::Float64 desiredRpm);
   void desiredVelocityReceive(geometry_msgs::Twist desiredVelocity);
   void sendMotorPwm(unsigned int pwmValue);
 
@@ -70,9 +69,9 @@ protected:
   ros::Publisher mStatePub_;
 
   /**
- * Publishes the wheel RPMs.
- */
-ros::Publisher mWheelRpmPub_;
+   * Publishes the wheel RPMs.
+   */
+  ros::Publisher mWheelRpmPub_;
 
   /**
    * Publishes the motor PWM value to the backbone bus.
@@ -80,18 +79,18 @@ ros::Publisher mWheelRpmPub_;
   ros::Publisher mBackboneWritePub_;
 
   /**
+   * Publishes the desired RPM computed from the desired velocity.
+   */
+  ros::Publisher mDesiredMotorRpmPub_;
+
+  /**
    * Subscribes to the PID controller to get control effort.
    */
   ros::Subscriber mControlEffortSub_;
 
   /**
-   * Receives motor RPM commands.
+   * Receives motor velocity commands.
    */
-  ros::Subscriber mDesiredMotorRpmSub_;
-
-  /**
- * Receives motor velocity commands.
- */
   ros::Subscriber mDesiredMotorVelSub_;
 
   /**

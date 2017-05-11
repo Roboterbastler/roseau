@@ -14,8 +14,8 @@ MotorController::MotorController(ros::NodeHandle &nh)
 	mStatePub_ = mNodeHandle_.advertise<std_msgs::Float64>("motor_rpm", 100);
 	mBackboneWritePub_ = mNodeHandle_.advertise<backbone_bridge::BackboneWrite>("backbone_write", 100);
 	mWheelRpmPub_ = mNodeHandle_.advertise<motor_controller::WheelRpm>("wheel_rpm", 100);
+	mDesiredMotorRpmPub_ = mNodeHandle_.advertise<std_msgs::Float64>("desired_motor_rpm", 100);
 	mControlEffortSub_ = mNodeHandle_.subscribe("control_effort", 100, &MotorController::controlEffortReceive, this);
-	mDesiredMotorRpmSub_ = mNodeHandle_.subscribe("desired_motor_rpm", 100, &MotorController::desiredMotorRpmReceive, this);
 	mDesiredMotorVelSub_ = mNodeHandle_.subscribe("desired_velocity", 100, &MotorController::desiredVelocityReceive, this);
 	mBackboneReadClient_ = mNodeHandle_.serviceClient<backbone_bridge::BackboneRead>("backbone_read");
 
@@ -85,10 +85,6 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 	sendMotorPwm(pwmValue);
 }
 
-void MotorController::desiredMotorRpmReceive(std_msgs::Float64 desiredRpm) {
-	mDesiredMotorRpm_ = desiredRpm.data;
-}
-
 void MotorController::desiredVelocityReceive(geometry_msgs::Twist desiredVelocity) {
 	// first, handle linear velocity (only possible in x direction)
 	double desiredRpm = 60. * desiredVelocity.linear.x * 1000. / WHEEL_CIRCUMFERENCE_MM;
@@ -102,6 +98,10 @@ void MotorController::desiredVelocityReceive(geometry_msgs::Twist desiredVelocit
 		mCurrentDirection_ = Direction::HALT;
 		mDesiredMotorRpm_ = 0;
 	}
+
+	std_msgs::Float64 msg;
+	msg.data = desiredRpm;
+	mDesiredMotorRpmPub_.publish(msg);
 
 	// angular velocity TODO
 	// compute steering angle from desired angular an linear speed
