@@ -66,7 +66,7 @@ void MotorController::run(const ros::WallTimerEvent& event) {
 
 void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 	// apply control effort to motor PWM value
-	mCurrentMotorPower_ = controlEffort.data;
+	mCurrentMotorPower_ += controlEffort.data;
 
 	// limit power value
 	if(mCurrentMotorPower_ < -31) {
