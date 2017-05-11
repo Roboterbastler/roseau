@@ -7,7 +7,7 @@
 MotorController::MotorController(ros::NodeHandle &nh)
   : mNodeHandle_(nh),
     mDesiredMotorRpm_(0),
-	mCurrentDirection_(Direction::FORWARDS),
+	mCurrentDirection_(Direction::HALT),
 	mCurrentMotorPower_(0) {
 
 	mSetPointPub_ = mNodeHandle_.advertise<std_msgs::Float64>("setpoint", 100);
@@ -66,11 +66,11 @@ void MotorController::run(const ros::WallTimerEvent& event) {
 
 void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 	// apply control effort to motor PWM value
-	mCurrentMotorPower_ = mCurrentMotorPower_ + controlEffort.data;
+	mCurrentMotorPower_ = controlEffort.data;
 
 	// limit power value
-	if(mCurrentMotorPower_ < 0) {
-		mCurrentMotorPower_ = 0;
+	if(mCurrentMotorPower_ < -31) {
+		mCurrentMotorPower_ = -31;
 	}
 	if(mCurrentMotorPower_ > 31) {
 		mCurrentMotorPower_ = 31;
@@ -80,11 +80,6 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 
 	// compute PWM value from power value
 	unsigned int pwmValue = motorPowerToPwm(mCurrentMotorPower_, mCurrentDirection_);
-
-	// stop immediately
-	if(mDesiredMotorRpm_ == 0) {
-		pwmValue = MOTOR_PWM_NEUTRAL;
-	}
 
 	// send PWM value to motor
 	sendMotorPwm(pwmValue);
@@ -97,7 +92,16 @@ void MotorController::desiredMotorRpmReceive(std_msgs::Float64 desiredRpm) {
 void MotorController::desiredVelocityReceive(geometry_msgs::Twist desiredVelocity) {
 	// first, handle linear velocity (only possible in x direction)
 	double desiredRpm = 60. * desiredVelocity.linear.x * 1000. / WHEEL_CIRCUMFERENCE_MM;
-	mDesiredMotorRpm_ = desiredRpm;
+	if(desiredRpm > 0) {
+		mDesiredMotorRpm_ = desiredRpm;
+		mCurrentDirection_ = Direction::FORWARDS;
+	} else if (desiredRpm < 0) {
+		mDesiredMotorRpm_ = -desiredRpm;
+		mCurrentDirection_ = Direction::BACKWARDS;
+	} else {
+		mCurrentDirection_ = Direction::HALT;
+		mDesiredMotorRpm_ = 0;
+	}
 
 	// angular velocity TODO
 	// compute steering angle from desired angular an linear speed
@@ -117,7 +121,7 @@ void MotorController::sendMotorPwm(unsigned int pwmValue) {
 }
 
 unsigned int MotorController::motorPowerToPwm(double motorPower, Direction direction) {
-	ROS_ASSERT(motorPower >= 0);
+	ROS_ASSERT(motorPower >= -31);
 	ROS_ASSERT(motorPower <= 31);
 
 	unsigned int pwmValue;

@@ -53,8 +53,9 @@ protected:
   } mCurrentDirection_;
 
   /**
-   * The current motor power value in the range 0...31 independent of the direction.
+   * The current motor power value in the range -31...0...31.
    * A value of 31 means 100% power.
+   * This is proportional to the PWM value used to control the motor.
    */
   double mCurrentMotorPower_;
 
