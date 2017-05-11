@@ -57,7 +57,12 @@ void MotorController::run(const ros::WallTimerEvent& event) {
 
 		// send state (current motor RPM) to pid
 		std_msgs::Float64 motorRpmMsg;
-		motorRpmMsg.data = motorRpm;
+		if(mCurrentDirection_ == Direction::BACKWARDS) {
+			motorRpmMsg.data = -motorRpm;
+		} else {
+			motorRpmMsg.data = motorRpm;
+		}
+
 		mStatePub_.publish(motorRpmMsg);
 	} else {
 		ROS_ERROR_THROTTLE(2, "Reading wheel RPMs failed");
@@ -88,16 +93,7 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 void MotorController::desiredVelocityReceive(geometry_msgs::Twist desiredVelocity) {
 	// first, handle linear velocity (only possible in x direction)
 	double desiredRpm = 60. * desiredVelocity.linear.x * 1000. / WHEEL_CIRCUMFERENCE_MM;
-	if(desiredRpm > 0) {
-		mDesiredMotorRpm_ = desiredRpm;
-		mCurrentDirection_ = Direction::FORWARDS;
-	} else if (desiredRpm < 0) {
-		mDesiredMotorRpm_ = -desiredRpm;
-		mCurrentDirection_ = Direction::BACKWARDS;
-	} else {
-		mCurrentDirection_ = Direction::HALT;
-		mDesiredMotorRpm_ = 0;
-	}
+	mDesiredMotorRpm_ = desiredRpm;
 
 	std_msgs::Float64 msg;
 	msg.data = desiredRpm;
@@ -126,16 +122,10 @@ unsigned int MotorController::motorPowerToPwm(double motorPower, Direction direc
 
 	unsigned int pwmValue;
 
-	switch(direction) {
-	case Direction::FORWARDS:
-		pwmValue = MOTOR_PWM_NEUTRAL + motorPower;
-		break;
-	case Direction::BACKWARDS:
-		pwmValue = MOTOR_PWM_NEUTRAL - motorPower;
-		break;
-	case Direction::HALT:
-	default:
+	if(direction == Direction::HALT) {
 		pwmValue = MOTOR_PWM_NEUTRAL;
+	} else {
+		pwmValue = MOTOR_PWM_NEUTRAL + motorPower;
 	}
 
 	ROS_ASSERT(pwmValue >= MOTOR_PWM_MIN);
