@@ -93,7 +93,7 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 void MotorController::desiredVelocityReceive(geometry_msgs::Twist desiredVelocity) {
 	if(desiredVelocity.linear.x > 0) {
 		mCurrentDirection_ = Direction::FORWARDS;
-	} else if(desiredVelocity < 0) {
+	} else if(desiredVelocity.linear.x < 0) {
 		mCurrentDirection_ = Direction::BACKWARDS;
 	} else {
 		mCurrentDirection_ = Direction::HALT;
