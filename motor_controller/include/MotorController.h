@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Float64.h>
+#include <geometry_msgs/Twist.h>
 
 #define MOTOR_CONTROLLER_DEVICE_ADDRESS 16
 #define MOTOR_CONTROLLER_RPM_DATA_START 8
@@ -13,6 +14,8 @@
 #define MOTOR_PWM_MIN 63
 #define MOTOR_PWM_MAX 125
 
+#define WHEEL_CIRCUMFERENCE_MM 208
+
 class MotorController {
 public:
   MotorController(ros::NodeHandle &nh);
@@ -21,6 +24,7 @@ protected:
   void run(const ros::WallTimerEvent& event);
   void controlEffortReceive(std_msgs::Float64 controlEffort);
   void desiredMotorRpmReceive(std_msgs::Float64 desiredRpm);
+  void desiredVelocityReceive(geometry_msgs::Twist desiredVelocity);
   void sendMotorPwm(unsigned int pwmValue);
 
 protected:
@@ -83,6 +87,11 @@ ros::Publisher mWheelRpmPub_;
    * Receives motor RPM commands.
    */
   ros::Subscriber mDesiredMotorRpmSub_;
+
+  /**
+ * Receives motor velocity commands.
+ */
+  ros::Subscriber mDesiredMotorVelSub_;
 
   /**
    * Reads via the backbone bus.
