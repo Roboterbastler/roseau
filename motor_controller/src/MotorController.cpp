@@ -128,10 +128,10 @@ unsigned int MotorController::motorPowerToPwm(double motorPower, Direction direc
 
 	switch(direction) {
 	case Direction::FORWARDS:
-		pwmValue = MOTOR_PWM_NEUTRAL + (unsigned int)motorPower;
+		pwmValue = MOTOR_PWM_NEUTRAL + motorPower;
 		break;
 	case Direction::BACKWARDS:
-		pwmValue = MOTOR_PWM_NEUTRAL - (unsigned int)motorPower;
+		pwmValue = MOTOR_PWM_NEUTRAL - motorPower;
 		break;
 	case Direction::HALT:
 	default:
