@@ -71,7 +71,11 @@ void MotorController::run(const ros::WallTimerEvent& event) {
 
 void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 	// apply control effort to motor PWM value
-	mCurrentMotorPower_ += controlEffort.data;
+	if(mCurrentDirection_ == Direction::FORWARDS) {
+		mCurrentMotorPower_ += controlEffort.data;
+	} else if(mCurrentDirection_ == Direction::BACKWARDS) {
+		mCurrentMotorPower_ -= controlEffort.data;
+	}
 
 	// limit power value
 	if(mCurrentMotorPower_ < -31) {
@@ -91,20 +95,26 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 }
 
 void MotorController::desiredVelocityReceive(geometry_msgs::Twist desiredVelocity) {
-	if(desiredVelocity.linear.x > 0) {
-		mCurrentDirection_ = Direction::FORWARDS;
-	} else if(desiredVelocity.linear.x < 0) {
-		mCurrentDirection_ = Direction::BACKWARDS;
-	} else {
-		mCurrentDirection_ = Direction::HALT;
-	}
+
 
 	// first, handle linear velocity (only possible in x direction)
 	double desiredRpm = 60. * desiredVelocity.linear.x * 1000. / WHEEL_CIRCUMFERENCE_MM;
 	mDesiredMotorRpm_ = desiredRpm;
 
+	// publish desired rpm to pid controller
 	std_msgs::Float64 msg;
-	msg.data = desiredRpm;
+
+	if(desiredVelocity.linear.x > 0) {
+		mCurrentDirection_ = Direction::FORWARDS;
+		msg.data = desiredRpm;
+	} else if(desiredVelocity.linear.x < 0) {
+		mCurrentDirection_ = Direction::BACKWARDS;
+		msg.data = -desiredRpm;
+	} else {
+		mCurrentDirection_ = Direction::HALT;
+		msg.data = desiredRpm;
+	}
+
 	mDesiredMotorRpmPub_.publish(msg);
 
 	// angular velocity TODO
