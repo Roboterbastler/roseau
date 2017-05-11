@@ -91,6 +91,14 @@ void MotorController::controlEffortReceive(std_msgs::Float64 controlEffort) {
 }
 
 void MotorController::desiredVelocityReceive(geometry_msgs::Twist desiredVelocity) {
+	if(desiredVelocity.linear.x > 0) {
+		mCurrentDirection_ = Direction::FORWARDS;
+	} else if(desiredVelocity < 0) {
+		mCurrentDirection_ = Direction::BACKWARDS;
+	} else {
+		mCurrentDirection_ = Direction::HALT;
+	}
+
 	// first, handle linear velocity (only possible in x direction)
 	double desiredRpm = 60. * desiredVelocity.linear.x * 1000. / WHEEL_CIRCUMFERENCE_MM;
 	mDesiredMotorRpm_ = desiredRpm;
