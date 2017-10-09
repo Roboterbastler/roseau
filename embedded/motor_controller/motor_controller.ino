@@ -1,17 +1,28 @@
-#include <Servo.h>
+#include <ArduinoHardware.h>
+#include <ros.h>
 
-// The ESC motor controller
-Servo motorController;
+#include "MotorController.h"
+#include "SteeringController.h"
 
-// The steering servo
-Servo steering;
+ros::NodeHandle nh;
 
 void setup() {
-  // put your setup code here, to run once:
+  // setup ROS
+  nh.initNode();
 
+  // initialize motor controller
+  motor::init(nh);
+
+  // initialize steering controller
+  steering::init(nh);
+
+  while(!nh.connected()) {
+    nh.spinOnce();
+  }
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  motor::update();
+  nh.spinOnce();
 }
