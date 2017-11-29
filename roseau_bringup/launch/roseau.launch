@@ -1,7 +1,6 @@
 <launch>
     <!-- System nodes -->
     <node name="cpu_temp_node" pkg="raspi_cpu_temp" type="raspi_cpu_temp_node.py" />
-    <node name="backbone_bridge" pkg="backbone_bridge" type="backbone_bridge_node.py" />
     
     <!-- Sensor nodes -->
     <!-- <node name="camera_node" pkg="raspicam_node" type="raspicam_node" /> -->
