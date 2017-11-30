@@ -1,6 +1,6 @@
 <launch>
     <node name="motor_controller_bridge" pkg="rosserial_python" type="serial_node.py" output="screen">
-        <param name="port" value="/dev/motor_controller"/>
+        <param name="port" value="/dev/arduino_motor_controller"/>
     </node>
     
     <node name="motor_pid_controller" pkg="pid" type="controller" >
