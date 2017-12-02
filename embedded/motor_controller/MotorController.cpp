@@ -7,14 +7,18 @@
 #define LEFT_ENCODER_PIN 2
 #define RIGHT_ENCODER_PIN 3
 
-#define TICKS_PER_REVOLUTION 128.0
-#define WHEEL_CIRCUMFERENCE_M 0.208
+//#define TICKS_PER_REVOLUTION 128.0
+//#define WHEEL_CIRCUMFERENCE_M 0.208
 
 #define PID_KP 0.0
 #define PID_KI 0.0
 #define PID_KD 0.0
 
-#define PUBLISH_RATE 10
+#define ESC_NEUTRAL 127
+
+#define PID_SAMPLE_TIME_MS 10
+#define ENCODER_SAMPLE_TIME_MS 10
+#define ODOM_PUB_TIME_MS 100
 
 namespace motor {
 
@@ -23,19 +27,31 @@ Servo motorController;
 
 volatile byte left_ticks;
 volatile byte right_ticks;
-unsigned long last_time;
+byte left_ticks_acc;
+byte right_ticks_acc;
 
-unsigned long last_publish_time;
+bool forwards;
 
-double rpm_input;
-double rpm_output;
-double rpm_setpoint;
+// measured ticks per second
+double tps_input;
 
-PID motorPID(&rpm_input, &rpm_output, &rpm_setpoint, PID_KP, PID_KI, PID_KD, DIRECT);
+// PWM value
+double pwm_output;
 
-ros::Publisher("", );
+// setpoint ticks per second
+double tps_setpoint;
 
-void init(ros::NodeHandle &nh) {
+PID motorPID(&tps_input, &pwm_output, &tps_setpoint, PID_KP, PID_KI, PID_KD, DIRECT);
+
+static void left_encoder_cb() {
+  left_ticks++;
+}
+
+static void right_encoder_cb() {
+  right_ticks++;
+}
+
+void init() {
   // setup ESC motor controller
   motorController.attach(10);
   motorController.write(90);
@@ -48,74 +64,64 @@ void init(ros::NodeHandle &nh) {
 
   left_ticks = 0;
   right_ticks = 0;
-  rpm_setpoint = 0.0;
-  rpm_input = 0.0;
-  rpm_output = 0.0;
-  last_time = millis();
-  last_publish_time = millis();
+  left_ticks_acc = 0;
+  right_ticks_acc = 0;
+  
+  tps_setpoint = 0.0;
+  tps_input = 0.0;
+  pwm_output = 0.0;
+  
+  forwards = true;
 
-  motorPID.SetMode(AUTOMATIC);  
-
-  nh.loginfo("Motor controller initialized.");
+  motorPID.SetMode(AUTOMATIC);
+  motorPID.SetSampleTime(PID_SAMPLE_TIME_MS);
 }
 
-void update() {
-  byte left_ticks, right_ticks;
-  unsigned long dur;
-
-  getTicks(&left_ticks, &right_ticks, &dur);
-
-  if(dur == 0) {
-    dur = 1;
-  }
-
-  byte avg_ticks = (left_ticks + right_ticks) / 2;
-
-  // convert to ticks per second and update PID input
-  rpm_input = (double)avg_ticks * 1000.0 / (double)dur;
-
-  motorPID.Compute();
-
-  // TODO: update ESC PWM from PID output
-
-  // check if velocity should be published
-  unsigned long pubDur = millis() - last_publish_time;
-  
-  if(pubDur > (1000 / PUBLISH_RATE)) {
-    last_publish_time = millis();
-    
-    // distance in m
-    double dLeft = WHEEL_CIRCUMFERENCE_M * (double)left_ticks / TICKS_PER_REVOLUTION;
-    double dRight = WHEEL_CIRCUMFERENCE_M * (double)right_ticks / TICKS_PER_REVOLUTION;
-  
-    // compute velocities in m/s^2
-    double d = (double)dur / 1000.0;
-    double left = dLeft / d;
-    double right = dRight / d;
-  }
-}
-
-void setVelocity(double vel) {
-  
-}
-
-void getTicks(byte *left, byte *right, unsigned long *dur) {
-  unsigned long now = millis();
-  *dur = now - last_time;
-  last_time = now;
-
+static void getTicks(byte *left, byte *right) {
+  noInterrupts();
   *left = left_ticks;
   *right = right_ticks;
   left_ticks = 0;
   right_ticks = 0;
+  interrupts();
 }
 
-void left_encoder_cb() {
-  left_ticks++;
+void update() {
+  static unsigned long lastEncoderSampleTime = 0;
+
+  unsigned long now = millis();
+  unsigned long lastEncoderDur = now - lastEncoderSampleTime;
+  if(lastEncoderDur >= ENCODER_SAMPLE_TIME_MS) {
+    // sample encoders
+    byte lt, rt;
+    getTicks(&lt, &rt);
+    left_ticks_acc += lt;
+    right_ticks_acc += rt;
+    double ticks = (double)(lt + rt) / 2.0;
+    tps_input = ticks * (1000. / (double)lastEncoderDur);
+    
+    lastEncoderSampleTime = now;
+  }
+
+  motorPID.Compute();
+
+  // TODO: update ESC PWM from PID output
 }
 
-void right_encoder_cb() {
-  right_ticks++;
+void setVelocity(double tps) {
+  tps_setpoint = tps;
+}
+
+byte getLeftOdom() {
+  byte t = left_ticks_acc;
+  left_ticks_acc = 0;
+  return t;
+}
+
+byte getRightOdom() {
+  byte t = right_ticks_acc;
+  right_ticks_acc = 0;
+  return t;
 }
 
 }

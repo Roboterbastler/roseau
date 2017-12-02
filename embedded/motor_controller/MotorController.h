@@ -1,16 +1,15 @@
-#include <ros.h>
+#include <Arduino.h>
 
 namespace motor {
 
-void init(ros::NodeHandle &nh);
+void init();
 
 void update();
 
-void setVelocity(double vel);
+void setVelocity(double tps);
 
-void getTicks(byte *left, byte *right, unsigned long *dur);
-void left_encoder_cb();
-void right_encoder_cb();
+byte getLeftOdom();
+byte getRightOdom();
 
 }
 

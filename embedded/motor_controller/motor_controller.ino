@@ -11,7 +11,7 @@ void setup() {
   nh.initNode();
 
   // initialize motor controller
-  motor::init(nh);
+  motor::init();
 
   // initialize steering controller
   steering::init(nh);
