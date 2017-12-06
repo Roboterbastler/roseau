@@ -18,30 +18,29 @@
 
 #define PID_SAMPLE_TIME_MS 10
 #define ENCODER_SAMPLE_TIME_MS 10
-#define ODOM_PUB_TIME_MS 100
 
 namespace motor {
 
 // The ESC motor controller
-Servo motorController;
+static Servo motorController;
 
-volatile byte left_ticks;
-volatile byte right_ticks;
-byte left_ticks_acc;
-byte right_ticks_acc;
+static volatile byte left_ticks;
+static volatile byte right_ticks;
+static byte left_ticks_acc;
+static byte right_ticks_acc;
 
-bool forwards;
+static bool forwards;
 
 // measured ticks per second
-double tps_input;
+static double tps_input;
 
 // PWM value
-double pwm_output;
+static double pwm_output;
 
 // setpoint ticks per second
-double tps_setpoint;
+static double tps_setpoint;
 
-PID motorPID(&tps_input, &pwm_output, &tps_setpoint, PID_KP, PID_KI, PID_KD, DIRECT);
+static PID motorPID(&tps_input, &pwm_output, &tps_setpoint, PID_KP, PID_KI, PID_KD, DIRECT);
 
 static void left_encoder_cb() {
   left_ticks++;
