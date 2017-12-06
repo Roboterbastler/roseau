@@ -6,5 +6,5 @@
     <!-- <node name="camera_node" pkg="raspicam_node" type="raspicam_node" /> -->
     
     <!-- Actuator nodes -->
-    <include file="$(find motor_controller)/launch/motor_controller.launch" />
+    <include file="$(find roseau_motor_controller)/launch/motor_controller.launch" />
 </launch>
