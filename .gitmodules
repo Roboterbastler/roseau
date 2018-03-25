@@ -1,3 +1,6 @@
 [submodule "external_modules/raspicam_node"]
 	path = external_modules/raspicam_node
 	url = git@github.com:UbiquityRobotics/raspicam_node.git
+[submodule "external_modules/raspi_cpu_temp"]
+	path = external_modules/raspi_cpu_temp
+	url = git@github.com:Roboterbastler/raspi_cpu_temp.git
