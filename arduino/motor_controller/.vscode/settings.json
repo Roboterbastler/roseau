@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/jacob/.platformio/penv/bin:/home/jacob/.platformio/penv:/opt/Franz:/home/jacob/data/Arbeit/Enway/enway_ws/devel/bin:/opt/ros/kinetic/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/eclipse:/snap/bin:/home/jacob/.local/bin",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
